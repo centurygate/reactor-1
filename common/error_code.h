@@ -16,7 +16,7 @@
  * et错误码：1024~100000
 */
 
-#define	EM_INVALID_FILE_INDEX				15364 /* 非法的bt子文件id */
+#define	INVALID_FILE_INDEX				15364 /* 非法的bt子文件id */
 
 /************************** http error code	**********************************/
 #define ERR_HTTP_BASE						9300	//与2.0保持一致。1024*9 + 84 = 9300

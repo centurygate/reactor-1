@@ -96,7 +96,7 @@ static int32_t _socket_do_accept(socket_t *p_socket) {
 	
 	handle_set_nonblocking(p_handle_new);
 	
-	p_socket_new->stat = EM_SOCK_STAT_CONNECTED;
+	p_socket_new->stat = SOCK_STAT_CONNECTED;
 	p_socket_new->protocol = p_socket->protocol;
 	p_socket_new->p_handle = p_handle_new;
 	p_socket_new->msg_factory = p_socket->msg_factory;
@@ -106,7 +106,7 @@ static int32_t _socket_do_accept(socket_t *p_socket) {
 	p_socket_new->idle_timeout = p_socket->idle_timeout;
 	p_socket_new->peerport = be16toh(peerport);
 
-	if(p_socket->protocol == EM_SOCK_TCP) {
+	if(p_socket->protocol == SOCK_TCP) {
 		handle_settcpnodelay(p_handle);
 	}
 
@@ -193,7 +193,7 @@ label_try_to_handle_msg:
 		}
 	}
 	
-	if(p_socket->stat == EM_SOCK_STAT_CLOSING) {
+	if(p_socket->stat == SOCK_STAT_CLOSING) {
 		if(	p_socket->p_send_queue == NULL ||
 			fixed_queue_isempty(p_socket->p_send_queue)) {
 			do_close_socket(p_socket);
@@ -216,17 +216,17 @@ int32_t socket_on_readable(socket_t* p_socket) {
 	logger_assert(p_socket != NULL);
 
 	switch(p_socket->stat) {
-		case EM_SOCK_STAT_LISTENING:
+		case SOCK_STAT_LISTENING:
 			ret = _socket_do_accept(p_socket);
 			if(ret < 0) {
 				socket_on_error(p_socket, ret);
 			}
 			break;
-		case EM_SOCK_STAT_CONNECTING:
+		case SOCK_STAT_CONNECTING:
 			break;
-		case EM_SOCK_STAT_CONNECTED:
-			p_socket->stat = EM_SOCK_STAT_WORKING;
-		case EM_SOCK_STAT_WORKING:
+		case SOCK_STAT_CONNECTED:
+			p_socket->stat = SOCK_STAT_WORKING;
+		case SOCK_STAT_WORKING:
 			ret = _socket_do_recv(p_socket);
 			if (ret == SOCKCLOSED) {
 				return SOCKCLOSED;
@@ -237,12 +237,12 @@ int32_t socket_on_readable(socket_t* p_socket) {
 				return SOCKCLOSED;
 			}
 			break;
-		case EM_SOCK_STAT_ERROR:
+		case SOCK_STAT_ERROR:
 			socket_on_error(p_socket, p_socket->errcode);
 			do_close_socket(p_socket);
 			return SOCKCLOSED;
 			break;
-		case EM_SOCK_STAT_CLOSING:
+		case SOCK_STAT_CLOSING:
 			if (fixed_queue_isempty(p_socket->p_send_queue)
 				|| p_socket->errcode != 0)
 			{
@@ -290,12 +290,12 @@ int32_t socket_on_writable(socket_t* p_socket) {
 	logger_assert(p_socket != NULL);
 
 	switch(p_socket->stat) {
-		case EM_SOCK_STAT_LISTENING:
+		case SOCK_STAT_LISTENING:
 			// ignore
 			break;
-		case EM_SOCK_STAT_DNSPARSING:
+		case SOCK_STAT_DNSPARSING:
 			break;
-		case EM_SOCK_STAT_CONNECTING:
+		case SOCK_STAT_CONNECTING:
 			ret = handle_getsockerr(p_socket->p_handle);
 			if(ret < 0) {
 				socket_on_error(p_socket, ret);
@@ -306,15 +306,15 @@ int32_t socket_on_writable(socket_t* p_socket) {
 				uint16_t peerport;
 				handle_getpeername(p_socket->p_handle, &p_socket->peerip, &peerport);
 				p_socket->peerport = be16toh(peerport);
-				p_socket->stat = EM_SOCK_STAT_CONNECTED;
+				p_socket->stat = SOCK_STAT_CONNECTED;
 				if(p_socket->msg_processor.connect_handler) {
 					p_socket->msg_processor.connect_handler(p_socket);
 				}
 			}
 			break;
-		case EM_SOCK_STAT_CONNECTED:
-			p_socket->stat = EM_SOCK_STAT_WORKING;
-		case EM_SOCK_STAT_WORKING:
+		case SOCK_STAT_CONNECTED:
+			p_socket->stat = SOCK_STAT_WORKING;
+		case SOCK_STAT_WORKING:
 			ret = _socket_do_send(p_socket);
 			if(ret < 0) {
 				socket_on_error(p_socket, ret);
@@ -323,15 +323,15 @@ int32_t socket_on_writable(socket_t* p_socket) {
 			}
 			if(fixed_queue_isempty(p_socket->p_send_queue)) {
 				return selector_mod(p_socket->p_reactor->p_selector, p_socket->p_handle, 
-					EM_SELECTORIN, (void*)p_socket->id);
+					SELECTORIN, (void*)p_socket->id);
 			}
 			break;
-		case EM_SOCK_STAT_ERROR:
+		case SOCK_STAT_ERROR:
 			socket_on_error(p_socket, p_socket->errcode);
 			do_close_socket(p_socket);
 			return SOCKCLOSED;
 			break;
-		case EM_SOCK_STAT_CLOSING:
+		case SOCK_STAT_CLOSING:
 			if(!fixed_queue_isempty(p_socket->p_send_queue)) {
 				ret = _socket_do_send(p_socket);
 				if(ret < 0) {
@@ -355,7 +355,7 @@ void socket_on_error(socket_t* p_socket, int32_t errcode) {
 
 	p_socket->errcode = errcode;
 
-	p_socket->stat = EM_SOCK_STAT_ERROR;
+	p_socket->stat = SOCK_STAT_ERROR;
 
 	if(p_socket->msg_processor.error_handler) {
 		p_socket->msg_processor.error_handler(p_socket, errcode);
@@ -379,23 +379,23 @@ socket_t *create_socket(int protocol) {
 	}
 	memset(p_socket, 0, sizeof(*p_socket));
 	STRING_INITIALIZE(p_socket->host_str, p_socket->host_str_len);
-	p_socket->stat = EM_SOCK_STAT_INIT;
+	p_socket->stat = SOCK_STAT_INIT;
 	p_socket->protocol = protocol;
 	p_socket->p_handle = p_handle;
 	p_socket->last_active_time = time(NULL);
-	p_socket->idle_timeout = (time_t)EM_SOCKET_DEFAULT_IDLE_TIMEOUT;
-	p_socket->dns_timeout = (time_t)EM_SOCKET_DEFAULT_DNS_TIMEOUT;
-	p_socket->connect_timeout = (time_t)EM_SOCKET_DEFAULT_CONNECT_TIMEOUT;
+	p_socket->idle_timeout = (time_t)SOCKET_DEFAULT_IDLE_TIMEOUT;
+	p_socket->dns_timeout = (time_t)SOCKET_DEFAULT_DNS_TIMEOUT;
+	p_socket->connect_timeout = (time_t)SOCKET_DEFAULT_CONNECT_TIMEOUT;
 	p_socket->unique_tag = -1;
 
-	if(protocol == EM_SOCK_TCP) {
+	if(protocol == SOCK_TCP) {
 		handle_settcpnodelay(p_handle);
 	}
 	return p_socket;
 }
 
 void close_socket(socket_t *p_socket) {
-	p_socket->stat = EM_SOCK_STAT_CLOSING;
+	p_socket->stat = SOCK_STAT_CLOSING;
 	socket_set_idle_timeout(p_socket, (time_t)3);
 	if(NULL == p_socket->p_reactor) {
 		do_close_socket(p_socket);
@@ -411,7 +411,7 @@ int32_t socket_bind(socket_t *p_socket,
 
 	ret = handle_set_reuseaddr(p_socket->p_handle);
 	if(ret < 0) {
-		p_socket->stat = EM_SOCK_STAT_ERROR;
+		p_socket->stat = SOCK_STAT_ERROR;
 		p_socket->errcode = ret;
 		return ret;
 	}
@@ -424,12 +424,12 @@ int32_t socket_listen(socket_t *p_socket, int32_t backlog) {
 
 	ret = handle_listen(p_socket->p_handle, backlog);
 	if(ret < 0) {
-		p_socket->stat = EM_SOCK_STAT_ERROR;
+		p_socket->stat = SOCK_STAT_ERROR;
 		p_socket->errcode = ret;
 		return ret;
 	}
 
-	p_socket->stat = EM_SOCK_STAT_LISTENING;
+	p_socket->stat = SOCK_STAT_LISTENING;
 
 	return 0;
 }
@@ -448,7 +448,7 @@ int32_t socket_connect(socket_t *p_socket, const char *ipstr, uint16_t port /* h
 		}
 	}
 
-	p_socket->stat = EM_SOCK_STAT_CONNECTING;
+	p_socket->stat = SOCK_STAT_CONNECTING;
 	
 	return 0;
 }
@@ -464,14 +464,14 @@ int32_t socket_send(socket_t *p_socket, char *buffer, int32_t size, enum e_socke
 			return ret;
 		}
 
-		if (flag == EM_SOCKET_DETACH_MSG_BUFFER) {
+		if (flag == SOCKET_DETACH_MSG_BUFFER) {
 			free(buffer);
 		}
 
 		size = ret;
 		send_buf.p_buf = out_buf;
 	} else {
-		if (flag == EM_SOCKET_DETACH_MSG_BUFFER) {
+		if (flag == SOCKET_DETACH_MSG_BUFFER) {
 			send_buf.p_buf = buffer;
 		} else {
 			char *p = (char*)malloc(size);
@@ -513,7 +513,7 @@ int32_t conn_send(conn_info_t* p_conn_info, char *msg, uint32_t msg_len, enum e_
 		return send_len;
 	}
 	ret = selector_mod(p_conn_info->p_reactor->p_selector, p_conn_info->p_handle,
-		EM_SELECTORIN | EM_SELECTOROUT, (void*)p_conn_info->id);
+		SELECTORIN | SELECTOROUT, (void*)p_conn_info->id);
 	if (ret < 0) {
 		return ret;
 	}
@@ -522,13 +522,13 @@ int32_t conn_send(conn_info_t* p_conn_info, char *msg, uint32_t msg_len, enum e_
 
 void conn_close(conn_info_t* p_conn_info) {
 	selector_mod(p_conn_info->p_reactor->p_selector, p_conn_info->p_handle,
-		EM_SELECTOROUT, (void*)p_conn_info->id);
+		SELECTOROUT, (void*)p_conn_info->id);
 	close_socket(p_conn_info);
 }
 
 int32_t conn_is_connected(conn_info_t* p_conn_info) {
-	if (p_conn_info->stat == EM_SOCK_STAT_CONNECTED ||
-		p_conn_info->stat == EM_SOCK_STAT_WORKING) {
+	if (p_conn_info->stat == SOCK_STAT_CONNECTED ||
+		p_conn_info->stat == SOCK_STAT_WORKING) {
 		return 1;
 	}
 

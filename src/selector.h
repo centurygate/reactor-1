@@ -1,12 +1,12 @@
-#ifndef _EM_SELECTOR_20130716
-#define _EM_SELECTOR_20130716
+#ifndef SELECTOR_20130716
+#define SELECTOR_20130716
 
 #include "define.h"
 #include "handle.h"
 
-#define EM_SELECTORIN  0x1
-#define EM_SELECTOROUT 0x2
-#define EM_SELECTORERR 0x4
+#define SELECTORIN  0x1
+#define SELECTOROUT 0x2
+#define SELECTORERR 0x4
 
 typedef struct selector_event{
 	handle_t*			p_handle;
@@ -49,4 +49,4 @@ int32_t selector_iswriteable(struct selector *p_selector, int32_t idx);
 
 void *selector_data(struct selector *p_selector, int32_t idx);
 
-#endif //_EM_SELECTOR_20130716
+#endif //SELECTOR_20130716

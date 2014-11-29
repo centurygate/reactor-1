@@ -68,8 +68,8 @@ int main(int argc, char** argv)
 	test_msg_processor.close_handler = test_close_handler;
 	test_msg_processor.connect_handler = test_connect_handler;
 
-	conn = reactor_add_connector(reactor, EM_SOCK_TCP, host, port, &test_msg_factory, &test_msg_processor);
-	conn_send(conn, req, strlen(req), EM_SOCKET_COPY_MSG_BUFFER);
+	conn = reactor_add_connector(reactor, SOCK_TCP, host, port, &test_msg_factory, &test_msg_processor);
+	conn_send(conn, req, strlen(req), SOCKET_COPY_MSG_BUFFER);
 
 	msg_processor_finalize(&test_msg_processor);
 	msg_factory_finalize(&test_msg_factory);
