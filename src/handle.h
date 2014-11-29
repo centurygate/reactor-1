@@ -1,15 +1,15 @@
-#ifndef _HANDLE_20130716
-#define _HANDLE_20130716
+#ifndef _EM_HANDLE_20130716
+#define _EM_HANDLE_20130716
 
 #include "define.h"
 
-#define SOCK_TCP 0x1
-#define SOCK_UDP 0x2
+#define EM_SOCK_TCP 0x1
+#define EM_SOCK_UDP 0x2
 
 typedef enum {
-	FILE_HANDLE, 
-	SOCK_TCP_HANDLE,
-	SOCK_UDP_HANDLE
+	EM_FILE_HANDLE, 
+	EM_SOCK_TCP_HANDLE,
+	EM_SOCK_UDP_HANDLE
 } handle_type;
 
 typedef union {
@@ -57,4 +57,4 @@ int32_t handle_settcpnodelay(handle_t *p_handle);
 //int32_t handle_write(handle_t *p_handle, const char *buffer, int32_t expected_len);
 //int32_t handle_set_nonblocking(struct handle *p_handle);
 
-#endif //_HANDLE_20130716
+#endif //_EM_HANDLE_20130716

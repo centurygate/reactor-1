@@ -144,10 +144,10 @@ int32_t selector_wait(struct selector *p_selector, int32_t timeout /* ms */) {
 				p_selector->p_selector_handle->os_handle.fd) {
 			p_selector->p_selector_handle = p_selector->p_events[i].p_handle;
 		}
-		if(p_selector->p_events[i].events & SELECTORIN) {
+		if(p_selector->p_events[i].events & EM_SELECTORIN) {
 			FD_SET(p_selector->p_events[i].p_handle->os_handle.fd, &rset);
 		}
-		if(p_selector->p_events[i].events & SELECTOROUT) {
+		if(p_selector->p_events[i].events & EM_SELECTOROUT) {
 			FD_SET(p_selector->p_events[i].p_handle->os_handle.fd, &wset);
 		}
 		FD_SET(p_selector->p_events[i].p_handle->os_handle.fd, &eset);
@@ -178,13 +178,13 @@ int32_t selector_wait(struct selector *p_selector, int32_t timeout /* ms */) {
 			}
 			p_selector->p_events[i].revents = 0;
 			if(FD_ISSET(p_selector->p_events[i].p_handle->os_handle.fd, &rset)) {
-				p_selector->p_events[i].revents |= SELECTORIN;
+				p_selector->p_events[i].revents |= EM_SELECTORIN;
 			}
 			if(FD_ISSET(p_selector->p_events[i].p_handle->os_handle.fd, &wset)) {
-				p_selector->p_events[i].revents |= SELECTOROUT;
+				p_selector->p_events[i].revents |= EM_SELECTOROUT;
 			}
 			if(FD_ISSET(p_selector->p_events[i].p_handle->os_handle.fd, &eset)) {
-				p_selector->p_events[i].revents |= SELECTORERR;
+				p_selector->p_events[i].revents |= EM_SELECTORERR;
 			}
 		}
 	}
@@ -210,15 +210,15 @@ int32_t selector_isvalid(struct selector *p_selector, int32_t idx) {
 }
 
 int32_t selector_iserror(struct selector *p_selector, int32_t idx) {
-	return (int32_t)(p_selector->p_events[idx].revents & SELECTORERR);
+	return (int32_t)(p_selector->p_events[idx].revents & EM_SELECTORERR);
 }
 
 int32_t selector_isreadable(struct selector *p_selector, int32_t idx) {
-	return (int32_t)(p_selector->p_events[idx].revents & SELECTORIN);
+	return (int32_t)(p_selector->p_events[idx].revents & EM_SELECTORIN);
 }
 
 int32_t selector_iswriteable(struct selector *p_selector, int32_t idx) {
-	return (int32_t)(p_selector->p_events[idx].revents & SELECTOROUT);
+	return (int32_t)(p_selector->p_events[idx].revents & EM_SELECTOROUT);
 }
 
 void *selector_data(struct selector *p_selector, int32_t idx) {

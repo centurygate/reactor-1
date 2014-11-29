@@ -1,5 +1,5 @@
-#ifndef _MSG_PROCESSOR_20130820
-#define _MSG_PROCESSOR_20130820
+#ifndef _EM_MSG_PROCESSOR_20130820
+#define _EM_MSG_PROCESSOR_20130820
 
 #include <stdint.h>
 
@@ -18,4 +18,4 @@ typedef struct msg_processor {
 
 int32_t msg_processor_initialize(msg_processor_t* self);
 int32_t msg_processor_finalize(msg_processor_t* self);
-#endif //_MSG_PROCESSOR_20130820
+#endif //_EM_MSG_PROCESSOR_20130820

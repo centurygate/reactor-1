@@ -277,8 +277,8 @@ int tp_store_dict(TorrentParser *p_torrent, bencoding_dict* p_dict) {
 	bencoding_item_base *p_item = p_dict->_item;
 	int store_result = 0;
 
-	if (p_item->_type == BENCODING_ITINTEGER
-			|| p_item->_type == BENCODING_ITNEGINT) {
+	if (p_item->_type == BENCODING_ITEM_INTEGER
+			|| p_item->_type == BENCODING_ITEM_NEGINT) {
 		bencoding_int *p_int = (bencoding_int *) p_item;
 			
 		if (p_dict->_base._p_parent == NULL)   
@@ -292,11 +292,11 @@ int tp_store_dict(TorrentParser *p_torrent, bencoding_dict* p_dict) {
 		}
 
 		//p_dict is not the root dictionary
-		if (p_dict->_base._p_parent->_type == BENCODING_ITLIST) {
+		if (p_dict->_base._p_parent->_type == BENCODING_ITEM_LIST) {
 			//p_dict's parent is a list
 			bencoding_list *p_list =
 					(bencoding_list *) p_dict->_base._p_parent;
-			if (p_list->_base._p_parent->_type == BENCODING_ITDICT) {
+			if (p_list->_base._p_parent->_type == BENCODING_ITEM_DICT) {
 				//expecting p_list's parent is the dict referred by key "info" in the root dict
 				bencoding_dict *p_info_dict =
 						(bencoding_dict *) p_list->_base._p_parent;
@@ -338,11 +338,11 @@ int tp_store_dict(TorrentParser *p_torrent, bencoding_dict* p_dict) {
 			free(p_int);
 		
 	} 
-	else if (p_item->_type == BENCODING_ITSTRING) 
+	else if (p_item->_type == BENCODING_ITEM_STRING) 
 	{
 		if (p_dict->_base._p_parent != NULL) {
 			bencoding_string *p_str = (bencoding_string *) p_item;
-			if (p_dict->_base._p_parent->_type == BENCODING_ITLIST) {
+			if (p_dict->_base._p_parent->_type == BENCODING_ITEM_LIST) {
 				free(p_str->_str);
 			} else {
 				//p_dict's parent is a bencoding dictionary
@@ -464,12 +464,12 @@ static int tp_store_path(TorrentParser *p_torrent, bencoding_list* p_list)
 int tp_store_list(TorrentParser *p_torrent, bencoding_list* p_list) {
 	int store_result = 0;
 
-	if (p_list->_base._p_parent->_type == BENCODING_ITLIST) 
+	if (p_list->_base._p_parent->_type == BENCODING_ITEM_LIST) 
 	{
 		bencoding_item_base *p_parent_list = p_list->_base._p_parent;
 		bencoding_dict *p_dict = (bencoding_dict *) p_parent_list->_p_parent;
 		
-		if (p_parent_list->_p_parent->_type != BENCODING_ITDICT
+		if (p_parent_list->_p_parent->_type != BENCODING_ITEM_DICT
 			||p_parent_list->_p_parent->_p_parent != NULL) 
 		{
 			bencoding_item_base *p_node = p_list->_item;
@@ -477,7 +477,7 @@ int tp_store_list(TorrentParser *p_torrent, bencoding_list* p_list) {
 			{
 				bencoding_item_base *p_del = p_node;
 				p_node = p_node->_p_next;
-				if (p_del->_type == BENCODING_ITSTRING) {
+				if (p_del->_type == BENCODING_ITEM_STRING) {
 					free(((bencoding_string *) p_del)->_str);
 				}
 
@@ -501,7 +501,7 @@ int tp_store_list(TorrentParser *p_torrent, bencoding_list* p_list) {
 			{
 				bencoding_item_base *p_del = p_node;
 				p_node = p_node->_p_next;
-				if (p_del->_type == BENCODING_ITSTRING) {
+				if (p_del->_type == BENCODING_ITEM_STRING) {
 					free(((bencoding_string *) p_del)->_str);
 				}
 
@@ -530,7 +530,7 @@ int tp_store_list(TorrentParser *p_torrent, bencoding_list* p_list) {
 				p_del = p_node;
 				p_node = p_node->_p_next;
 
-				if (p_del->_type == BENCODING_ITSTRING) {
+				if (p_del->_type == BENCODING_ITEM_STRING) {
 					free(((bencoding_string *) p_del)->_str);
 				}
 				
@@ -558,7 +558,7 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 		if (p_item == NULL) {
 			break;
 		} 
-		else if (p_item->_type == BENCODING_ITINTEGER || p_item->_type == BENCODING_ITNEGINT) 
+		else if (p_item->_type == BENCODING_ITEM_INTEGER || p_item->_type == BENCODING_ITEM_NEGINT) 
 		{
 			bencoding_int *p_int = (bencoding_int *) p_item;
 			if (input_char >= '0' && input_char <= '9') 
@@ -568,16 +568,16 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 			} 
 			else if (input_char == '-') 
 			{
-				p_int->_base._type = BENCODING_ITNEGINT;
+				p_int->_base._type = BENCODING_ITEM_NEGINT;
 			}
 			else if (input_char == 'e') 
 			{
-				if (p_item->_type == BENCODING_ITNEGINT)
+				if (p_item->_type == BENCODING_ITEM_NEGINT)
 					p_int->_value = 0 - p_int->_value;
 
 				p_item = p_item->_p_parent;
 
-				if (p_item->_type == BENCODING_ITDICT) {
+				if (p_item->_type == BENCODING_ITEM_DICT) {
 					p_item->_state = dict_waiting_key;
 				}
 			} 
@@ -586,7 +586,7 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 				break;
 			}
 		} 
-		else if (p_item->_type == BENCODING_ITSTRING) 
+		else if (p_item->_type == BENCODING_ITEM_STRING) 
 		{
 			bencoding_string *p_str = (bencoding_string *) p_item;
 			if (p_item->_state == string_parsing_len) 
@@ -646,7 +646,7 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 				p_str->_str[p_str->_valid_len] = '\0';
 				p_item = p_item->_p_parent;
 
-				if (p_item->_type == BENCODING_ITDICT) {
+				if (p_item->_type == BENCODING_ITEM_DICT) {
 					p_item->_state =
 							(p_item->_state == dict_key_parsing) ?
 									dict_waiting_val : dict_waiting_key;
@@ -656,7 +656,7 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 				 *  by key "info" in the root dictionary of the torrent
 				 */
 				if (p_str->_valid_len == 4
-						&& p_str->_base._p_parent->_type == BENCODING_ITDICT
+						&& p_str->_base._p_parent->_type == BENCODING_ITEM_DICT
 						&& p_str->_base._p_parent->_p_parent == NULL
 						&& strncmp("info", p_str->_str, 4) == 0) {
 					p_torrent->parsing_related._update_info_sha1 = 1;
@@ -664,7 +664,7 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 				}
 			}
 		} 
-		else if (p_item->_type == BENCODING_ITDICT) 
+		else if (p_item->_type == BENCODING_ITEM_DICT) 
 		{
 			if (p_item->_state == dict_waiting_key) 
 			{
@@ -695,14 +695,14 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 						++p_torrent->parsing_related._bytes_parsed;
 						break;
 					} 
-					else if (p_item->_type == BENCODING_ITDICT) 
+					else if (p_item->_type == BENCODING_ITEM_DICT) 
 					{
 						p_item->_state = dict_waiting_key;
 					}
 					
 					if (p_item != NULL && p_item->_p_parent == NULL 
-						&& p_item->_type == BENCODING_ITDICT
-						&& ((bencoding_dict *)p_item)->_item->_type == BENCODING_ITDICT
+						&& p_item->_type == BENCODING_ITEM_DICT
+						&& ((bencoding_dict *)p_item)->_item->_type == BENCODING_ITEM_DICT
 						&& strncmp("info", ((bencoding_dict *)p_item)->_key->_str, 4) == 0) 
 					{
 						sha1_end = parse_cur + 1;
@@ -782,11 +782,11 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 				}
 			}
 		} 
-		else if (p_item->_type == BENCODING_ITLIST) 
+		else if (p_item->_type == BENCODING_ITEM_LIST) 
 		{
 			bencoding_list *p_list = (bencoding_list *) p_item;
 			if (p_list->_item != NULL
-					&& p_list->_item->_type != BENCODING_ITSTRING) 
+					&& p_list->_item->_type != BENCODING_ITEM_STRING) 
 			{
 				tp_store_list(p_torrent, p_list);
 			}
@@ -841,7 +841,7 @@ int parse_torrent_part(TorrentParser *p_torrent, const char * src,size_t len) {
 				}
 
 				p_item = p_item->_p_parent;
-				if (p_item->_type == BENCODING_ITDICT) 
+				if (p_item->_type == BENCODING_ITEM_DICT) 
 				{
 					p_item->_state = dict_waiting_key;
 				}
@@ -926,7 +926,7 @@ bencoding_int* bencoding_integer_create(bencoding_item_base *p_parent)
 	bencoding_int* p_int = (bencoding_int *)malloc(sizeof(bencoding_int));
 	
 	if (p_int != NULL) {
-		p_int->_base._type = BENCODING_ITINTEGER;
+		p_int->_base._type = BENCODING_ITEM_INTEGER;
 		p_int->_base._p_parent = p_parent;
 		p_int->_value = 0;
 		p_int->_base._len = 0;
@@ -941,7 +941,7 @@ bencoding_string* bencoding_string_create(bencoding_item_base *p_parent)
 	bencoding_string* p_str = (bencoding_string *)malloc(sizeof(bencoding_string));
 
 	if (p_str != NULL) {
-		p_str->_base._type = BENCODING_ITSTRING;
+		p_str->_base._type = BENCODING_ITEM_STRING;
 		p_str->_base._p_parent = p_parent;
 		p_str->_base._state = string_parsing_len;
 		p_str->_base._len = 0;
@@ -958,7 +958,7 @@ bencoding_list* bencoding_list_create(bencoding_item_base *p_parent)
 	bencoding_list* p_list = (bencoding_list *)malloc(sizeof(bencoding_list));
 
 	if (p_list != NULL) {
-		p_list->_base._type = BENCODING_ITLIST;
+		p_list->_base._type = BENCODING_ITEM_LIST;
 		p_list->_base._p_parent = p_parent;
 		p_list->_base._len = 0;
 		p_list->_item = NULL;
@@ -973,7 +973,7 @@ bencoding_dict* bencoding_dict_create(bencoding_item_base *p_parent)
 	bencoding_dict* p_dict = (bencoding_dict *)malloc(sizeof(bencoding_dict));
 
 	if (p_dict != NULL) {
-		p_dict->_base._type = BENCODING_ITDICT;
+		p_dict->_base._type = BENCODING_ITEM_DICT;
 		p_dict->_base._p_parent = p_parent;
 		p_dict->_base._state = dict_waiting_key;
 		p_dict->_base._len = 0;
@@ -997,12 +997,12 @@ void bencoding_list_destroy(bencoding_list *p_list)
 	while (p_node != NULL) {
 		bencoding_item_base *p_del = p_node;
 		p_node = p_node->_p_next;
-		if (p_del->_type == BENCODING_ITNEGINT
-				|| p_del->_type == BENCODING_ITINTEGER) {
+		if (p_del->_type == BENCODING_ITEM_NEGINT
+				|| p_del->_type == BENCODING_ITEM_INTEGER) {
 			free(p_del);
-		} else if (p_del->_type == BENCODING_ITSTRING) {
+		} else if (p_del->_type == BENCODING_ITEM_STRING) {
 			bencoding_string_destroy((bencoding_string *)p_del);
-		} else if (p_del->_type == BENCODING_ITLIST) {
+		} else if (p_del->_type == BENCODING_ITEM_LIST) {
 			bencoding_list_destroy((bencoding_list *)p_del);
 			free(p_del);
 		} else {
@@ -1020,12 +1020,12 @@ void bencoding_dict_destroy(bencoding_dict *p_dict)
 
 	if (p_dict->_item != NULL) 
 	{
-		if (p_dict->_item->_type == BENCODING_ITINTEGER
-				|| p_dict->_item->_type == BENCODING_ITNEGINT) {
+		if (p_dict->_item->_type == BENCODING_ITEM_INTEGER
+				|| p_dict->_item->_type == BENCODING_ITEM_NEGINT) {
 			free(p_dict->_item);
-		} else if (p_dict->_item->_type == BENCODING_ITSTRING) {
+		} else if (p_dict->_item->_type == BENCODING_ITEM_STRING) {
 			bencoding_string_destroy((bencoding_string *)p_dict->_item);
-		} else if (p_dict->_item->_type == BENCODING_ITLIST) {
+		} else if (p_dict->_item->_type == BENCODING_ITEM_LIST) {
 			bencoding_list_destroy((bencoding_list *)p_dict->_item);
 			free(p_dict->_item);
 		} else {
@@ -1108,7 +1108,7 @@ void tp_torrent_init(TorrentParser *torrent) {
 	torrent->parsing_related._torrent_dict._base._state =
 				dict_waiting_prefix;
 	torrent->parsing_related._torrent_dict._base._type =
-				BENCODING_ITDICT;
+				BENCODING_ITEM_DICT;
 	torrent->parsing_related._p_item =
 				(bencoding_item_base *) &torrent->parsing_related._torrent_dict;
 	torrent->parsing_related._torrent_size = 0;

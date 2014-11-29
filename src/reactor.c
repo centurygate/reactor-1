@@ -73,7 +73,7 @@ int32_t reactor_register(reactor_t *p_reactor, socket_t *p_socket) {
 	p_socket->unique_tag = p_reactor->socket_unique_tag_pool++;
 
 	ret = selector_add(p_reactor->p_selector, p_socket->p_handle, 
-		SELECTORIN | SELECTOROUT, (void*)p_socket->id);
+		EM_SELECTORIN | EM_SELECTOROUT, (void*)p_socket->id);
 	if(ret < 0) {
 		p_reactor->pp_socket[free_idx] = (socket_t*)next_free_idx;
 		return ret;
@@ -103,7 +103,7 @@ void reactor_deregister(reactor_t *p_reactor, socket_t *p_socket) {
 // 	NULL on error
 conn_info_t* reactor_add_connector(
 	reactor_t*		p_reactor, 
-	int32_t 			protocol, 		// SOCK_TCP or SOCK_UDP
+	int32_t 			protocol, 		// EM_SOCK_TCP or EM_SOCK_UDP
 	const char*			host, 			// c style string. e.g. "192.168.8.8\0"
 	uint16_t 			port, 			// host byte ordered
 	msg_factory_t*	p_msg_factory,
@@ -146,7 +146,7 @@ conn_info_t* reactor_add_connector(
 	}
 	else if (ret == EAGAIN) {
 		p_reactor->wait_dns_sock_count++;
-		p_socket->stat = SOCK_STAT_DNSPARSING;
+		p_socket->stat = EM_SOCK_STAT_DNSPARSING;
 	}
 	else {
 		free_socket(p_socket);
@@ -235,7 +235,7 @@ void reactor_handle_events(reactor_t *p_reactor, int32_t timeout /* ms */) {
 			sock_idx = (int32_t)selector_data(p_reactor->p_selector, idx);
 			p_socket = p_reactor->pp_socket[sock_idx];
 
-			if (p_socket->stat == SOCK_STAT_DNSPARSING) {
+			if (p_socket->stat == EM_SOCK_STAT_DNSPARSING) {
 				char ipstr[MAX_IP];
 				ret = query_addr_async(&p_reactor->dns_cache, p_socket->host_str, ipstr, 20);
 				if (ret == 0) {
@@ -249,7 +249,7 @@ void reactor_handle_events(reactor_t *p_reactor, int32_t timeout /* ms */) {
 				}
 				else if (ret == EAGAIN) {
 					// do nothing
-					// p_socket->stat = SOCK_STAT_DNSPARSING;
+					// p_socket->stat = EM_SOCK_STAT_DNSPARSING;
 				}
 				else {
 					p_reactor->wait_dns_sock_count--;
@@ -271,45 +271,45 @@ void reactor_handle_events(reactor_t *p_reactor, int32_t timeout /* ms */) {
 
 				if(selector_isreadable(p_reactor->p_selector, idx)) {
 					has_event = 1;
-					if (p_socket->stat != SOCK_STAT_CONNECTING)
+					if (p_socket->stat != EM_SOCK_STAT_CONNECTING)
 						p_socket->last_active_time = now;
 					ret = socket_on_readable(p_socket);
 				}
 
 				if (ret != SOCKCLOSED && selector_iswriteable(p_reactor->p_selector, idx)) {
 					has_event = 1;
-					if (p_socket->stat != SOCK_STAT_CONNECTING)
+					if (p_socket->stat != EM_SOCK_STAT_CONNECTING)
 						p_socket->last_active_time = now;
 					ret = socket_on_writable(p_socket);
 				}
 
-				if ( ret != SOCKCLOSED && !has_event && p_socket->stat != SOCK_STAT_LISTENING) {
+				if ( ret != SOCKCLOSED && !has_event && p_socket->stat != EM_SOCK_STAT_LISTENING) {
 					uintmax_t wait_time = (uintmax_t)now - (uintmax_t)p_socket->last_active_time;
 					switch (p_socket->stat)
 					{
-					case SOCK_STAT_WORKING:
-					case SOCK_STAT_CONNECTED:
+					case EM_SOCK_STAT_WORKING:
+					case EM_SOCK_STAT_CONNECTED:
 						if (wait_time > (uintmax_t)p_socket->idle_timeout) {
 							socket_on_error(p_socket, ESOCKIDLETIMEOUT);
 							do_close_socket(p_socket);
 						}
 						break;
-					case SOCK_STAT_DNSPARSING:
+					case EM_SOCK_STAT_DNSPARSING:
 						if (wait_time > (uintmax_t)p_socket->dns_timeout) {
 							socket_on_error(p_socket, ESOCKDNSTIMEOUT);
 							do_close_socket(p_socket);
 						}
 						break;
-					case SOCK_STAT_CONNECTING:
+					case EM_SOCK_STAT_CONNECTING:
 						if (wait_time > (uintmax_t)p_socket->connect_timeout) {
 							socket_on_error(p_socket, ESOCKCONNECTTIMEOUT);
 							do_close_socket(p_socket);
 						}
 						break;
-					case SOCK_STAT_INIT:
-					case SOCK_STAT_LISTENING:
-					case SOCK_STAT_ERROR:
-					case SOCK_STAT_CLOSING:
+					case EM_SOCK_STAT_INIT:
+					case EM_SOCK_STAT_LISTENING:
+					case EM_SOCK_STAT_ERROR:
+					case EM_SOCK_STAT_CLOSING:
 						break;
 					}
 				}

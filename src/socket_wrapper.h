@@ -1,5 +1,5 @@
-#ifndef _SOCKET_20130716
-#define _SOCKET_20130716
+#ifndef _EM_SOCKET_20130716
+#define _EM_SOCKET_20130716
 
 #include <time.h>
 #include "handle.h"
@@ -10,21 +10,21 @@
 
 #define SND_QUEUE_SIZE 20
 #define RECVBUF_INIT_SIZE 1024
-#define INADDR_ANY_STR "0.0.0.0"
-#define INADDR_LOCAL_STR "127.0.0.1"
-#define SOCKET_DEFAULT_IDLE_TIMEOUT 300 //seconds
-#define SOCKET_DEFAULT_DNS_TIMEOUT 120
-#define SOCKET_DEFAULT_CONNECT_TIMEOUT 30
+#define EM_INADDR_ANY_STR "0.0.0.0"
+#define EM_INADDR_LOCAL_STR "127.0.0.1"
+#define EM_SOCKET_DEFAULT_IDLE_TIMEOUT 300 //seconds
+#define EM_SOCKET_DEFAULT_DNS_TIMEOUT 120
+#define EM_SOCKET_DEFAULT_CONNECT_TIMEOUT 30
 
 typedef enum {
-	SOCK_STAT_INIT, 
-	SOCK_STAT_LISTENING,
-	SOCK_STAT_DNSPARSING, 
-	SOCK_STAT_CONNECTING,
-	SOCK_STAT_CONNECTED,
-	SOCK_STAT_WORKING,
-	SOCK_STAT_ERROR,
-	SOCK_STAT_CLOSING
+	EM_SOCK_STAT_INIT, 
+	EM_SOCK_STAT_LISTENING,
+	EM_SOCK_STAT_DNSPARSING, 
+	EM_SOCK_STAT_CONNECTING,
+	EM_SOCK_STAT_CONNECTED,
+	EM_SOCK_STAT_WORKING,
+	EM_SOCK_STAT_ERROR,
+	EM_SOCK_STAT_CLOSING
 } socket_stat_t;
 
 typedef struct socket_buf {
@@ -86,8 +86,8 @@ int32_t socket_connect(socket_t *p_socket,
 		const char *ipstr, uint16_t port /* host byte ordered */);
 
 enum e_socket_send_flag {
-	SOCKET_COPY_MSG_BUFFER,   // -caller have to manage msg buffer itself
-	SOCKET_DETACH_MSG_BUFFER, // -msg buffer will be freed when sent
+	EM_SOCKET_COPY_MSG_BUFFER,   // -caller have to manage msg buffer itself
+	EM_SOCKET_DETACH_MSG_BUFFER, // -msg buffer will be freed when sent
 };
 int32_t socket_send(socket_t* p_socket, char *buffer, int32_t size, enum e_socket_send_flag flag);
 
@@ -131,4 +131,4 @@ uint32_t conn_get_unique_tag(conn_info_t* p_conn_info);
 //  negative number on error
 int32_t conn_flush(conn_info_t* p_conn_info);
 
-#endif //_SOCKET_20130716
+#endif //_EM_SOCKET_20130716

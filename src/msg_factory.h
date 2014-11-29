@@ -1,5 +1,5 @@
-#ifndef _MSG_FACTORY_20130817
-#define _MSG_FACTORY_20130817
+#ifndef _EM_MSG_FACTORY_20130817
+#define _EM_MSG_FACTORY_20130817
 
 #include "define.h"
 
@@ -17,4 +17,4 @@ int32_t msg_factory_initialize(msg_factory_t* self);
 int32_t msg_factory_finalize(msg_factory_t* self);
 int32_t msg_validator_http(const char *msg, uint32_t msg_len);
 
-#endif //_MSG_FACTORY_20130817
+#endif //_EM_MSG_FACTORY_20130817
