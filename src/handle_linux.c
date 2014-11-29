@@ -25,13 +25,13 @@ handle_t* create_sock_handle(int protocol) {
 
 	memset(p_handle, 0, sizeof(*p_handle));
 	p_handle->id = -1;
-	if(protocol == EM_SOCK_TCP) {
+	if(protocol == SOCK_TCP) {
 		sock_type = SOCK_STREAM;
-		p_handle->type = EM_SOCK_TCP_HANDLE;
+		p_handle->type = SOCK_TCP_HANDLE;
 	}
-	else if(protocol == EM_SOCK_UDP) {
+	else if(protocol == SOCK_UDP) {
 		sock_type = SOCK_DGRAM;
-		p_handle->type = EM_SOCK_UDP_HANDLE;
+		p_handle->type = SOCK_UDP_HANDLE;
 	}
 	else {
 		return NULL;
@@ -238,7 +238,7 @@ handle_t *handle_accept(handle_t *p_handle, uint32_t *p_ip, uint16_t *p_port) {
 	}
 	memset(&peer_addr, 0, sizeof(peer_addr));
 	memset(p_new_handle, 0, sizeof(*p_new_handle));
-	p_new_handle->type = EM_SOCK_TCP_HANDLE;
+	p_new_handle->type = SOCK_TCP_HANDLE;
 	do {
 		ret = accept(p_handle->os_handle.fd, (struct sockaddr*)&peer_addr, &addr_len);
 	} while(ret < 0 && errno == EINTR);

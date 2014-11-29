@@ -1,5 +1,5 @@
-#ifndef _EM_REACTOR_20130716
-#define _EM_REACTOR_20130716
+#ifndef _REACTOR_20130716
+#define _REACTOR_20130716
 #include "define.h"
 #include "selector.h"
 #include "socket_wrapper.h"
@@ -32,7 +32,7 @@ void reactor_deregister(reactor_t *p_reactor, socket_t *p_socket);
 // NULL on error
 conn_info_t* reactor_add_connector(
 	reactor_t*		p_reactor, 
-	int32_t 			protocol, 		// EM_SOCK_TCP or EM_SOCK_UDP
+	int32_t 			protocol, 		// SOCK_TCP or SOCK_UDP
 	const char*			host, 			// c style string. e.g. "192.168.8.8\0"
 	uint16_t 			port, 			// host byte ordered
 	msg_factory_t*	p_msg_factory,
@@ -43,11 +43,11 @@ conn_info_t* reactor_add_connector(
 //	NULL on error
 conn_info_t* reactor_add_acceptor(
 	reactor_t*		p_reactor,
-	int32_t 			protocol, 		// EM_SOCK_TCP or EM_SOCK_UDP
+	int32_t 			protocol, 		// SOCK_TCP or SOCK_UDP
 	const char*			ip, 			// c style string. ip string on interface. e.g. "192.168.8.8\0"
 										// pre-defined macros:
-										// 		EM_INADDR_ANY_STR for any interface
-										// 		EM_INADDR_LOCAL_STR for loopback interface only
+										// 		INADDR_ANY_STR for any interface
+										// 		INADDR_LOCAL_STR for loopback interface only
 
 	uint16_t 			port, 			// host byte ordered
 	msg_factory_t*	p_msg_factory,
@@ -59,4 +59,4 @@ int32_t reactor_get_last_err(reactor_t *p_reactor);
 
 socket_t* reactor_find_conn_by_unique_tag(reactor_t *p_reactor, uint32_t unique_tag);
 
-#endif //_EM_REACTOR_20130716
+#endif //_REACTOR_20130716

@@ -1,5 +1,5 @@
-#ifndef _EM_TIMER_20130718
-#define _EM_TIMER_20130718
+#ifndef _TIMER_20130718
+#define _TIMER_20130718
 
 #include "define.h"
 
@@ -32,4 +32,4 @@ void timer_container_handle_events(timer_container_t* p_timer_container);
 
 void* timer_get_args(timer_container_t* p_timer_container, int32_t timerid);
 
-#endif //_EM_TIMER_20130718
+#endif //_TIMER_20130718

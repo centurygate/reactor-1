@@ -368,7 +368,7 @@
 
 #define MAX_USERNAME_SIZE 32
 #define MAX_JUMPKEY_SIZE 256
-#define MAX_SYSTEM_PATH 80
+#define MAX_SYSTPATH 80
 #define MAX_DEFAULT_DL_PATH 128
 
 typedef int32_t(*unary_function_t)(void*);

@@ -25,11 +25,11 @@ typedef struct tag_torrent_sub_file_info {
 } TorrentSubFileInfo;
 
 typedef enum __tag_bencoding_item_type {
-	BENCODING_ITEM_INTEGER,
-	BENCODING_ITEM_NEGINT,
-	BENCODING_ITEM_STRING,
-	BENCODING_ITEM_LIST,
-	BENCODING_ITEM_DICT,
+	BENCODING_ITINTEGER,
+	BENCODING_ITNEGINT,
+	BENCODING_ITSTRING,
+	BENCODING_ITLIST,
+	BENCODING_ITDICT,
 } bencoding_item_type;
 
 typedef enum __tag_tp_parsing_state {
